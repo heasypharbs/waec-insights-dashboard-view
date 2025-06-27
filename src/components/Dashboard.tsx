@@ -1,17 +1,19 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Users, FileText, Calculator, TrendingUp, BookOpen, Target, MapPin, Building } from 'lucide-react';
+import { Users, FileText, Calculator, TrendingUp, BookOpen, Target } from 'lucide-react';
 import { dashboardService } from '../services/dashboardService';
 import { DashboardHeader } from './DashboardHeader';
 import { MetricCard } from './MetricCard';
 import { SubjectChart } from './SubjectChart';
 import { ProgressChart } from './ProgressChart';
 import { ExamTable } from './ExamTable';
+import { MarkingVenueFilter } from './MarkingVenueFilter';
 import { ExamRecord } from '../data/mockDashboardData';
 
 export const Dashboard = () => {
   const [refreshKey, setRefreshKey] = useState(0);
+  const [selectedVenue, setSelectedVenue] = useState<string>('all');
 
   const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ['markingVenueReport', refreshKey],
@@ -19,22 +21,23 @@ export const Dashboard = () => {
     refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
-  const examData = dashboardData?.returnData || [];
+  const allExamData = dashboardData?.returnData || [];
+  
+  // Filter data based on selected venue
+  const examData = selectedVenue === 'all' 
+    ? allExamData 
+    : allExamData.filter(item => item.mvCode.toString() === selectedVenue);
 
-  // Calculate summary metrics with marking venue information
+  // Calculate summary metrics
   const totalSubjects = examData.length;
   const totalExaminers = examData.reduce((sum, item) => sum + item.totalExaminers, 0);
   const totalScriptsAllocated = examData.reduce((sum, item) => sum + item.totalAllocated, 0);
   const totalReconciled = examData.reduce((sum, item) => sum + item.totalReconciled, 0);
   const averageScriptsPerExaminer = totalExaminers > 0 ? Math.round(totalScriptsAllocated / totalExaminers) : 0;
   const completionRate = totalScriptsAllocated > 0 ? (totalReconciled / totalScriptsAllocated) * 100 : 0;
-  
-  // Get marking venue info from first record (all records have same venue in this dataset)
-  const markingVenueInfo = examData.length > 0 ? {
-    name: examData[0].mvName,
-    code: examData[0].mvCode,
-    zoneCode: examData[0].markingZoneCode
-  } : null;
+
+  // Get venue statistics
+  const totalVenues = Array.from(new Set(allExamData.map(item => item.mvCode))).length;
 
   if (isLoading) {
     return (
@@ -66,36 +69,14 @@ export const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
-        <DashboardHeader />
+        <DashboardHeader totalVenues={totalVenues} />
         
-        {/* Marking Venue Info */}
-        {markingVenueInfo && (
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border-l-4 border-yellow-500">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <Building className="h-5 w-5 text-blue-900" />
-                <div>
-                  <p className="text-sm text-gray-600">Marking Venue</p>
-                  <p className="font-semibold text-gray-900">{markingVenueInfo.name}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-blue-900" />
-                <div>
-                  <p className="text-sm text-gray-600">Venue Code</p>
-                  <p className="font-semibold text-gray-900">{markingVenueInfo.code}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Target className="h-5 w-5 text-blue-900" />
-                <div>
-                  <p className="text-sm text-gray-600">Marking Zone</p>
-                  <p className="font-semibold text-gray-900">{markingVenueInfo.zoneCode}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Marking Venue Filter */}
+        <MarkingVenueFilter 
+          data={allExamData}
+          selectedVenue={selectedVenue}
+          onVenueChange={setSelectedVenue}
+        />
         
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
@@ -143,10 +124,10 @@ export const Dashboard = () => {
           />
         </div>
 
-        {/* Progress Chart */}
-        <ProgressChart />
+        {/* Subject Comparison Chart */}
+        <ProgressChart data={examData} />
 
-        {/* Charts */}
+        {/* Subject Distribution Charts */}
         <SubjectChart data={examData} />
 
         {/* Detailed Table with Pagination */}
@@ -155,7 +136,10 @@ export const Dashboard = () => {
         {/* Footer */}
         <div className="mt-8 text-center text-gray-600 text-sm">
           <p>WAEC Marking Venue Dashboard • Last updated: {new Date().toLocaleString()}</p>
-          <p className="mt-1">Data refreshes automatically every 30 seconds</p>
+          <p className="mt-1">
+            Showing {selectedVenue === 'all' ? 'all venues' : 'selected venue'} • 
+            Data refreshes automatically every 30 seconds
+          </p>
         </div>
       </div>
     </div>

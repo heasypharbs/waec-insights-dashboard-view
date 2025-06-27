@@ -1,40 +1,35 @@
 
 import { useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ExamRecord } from '../data/mockDashboardData';
 
-// Mock progress data for different time periods with daily zigzag pattern
-const generateProgressData = (days: number) => {
-  const data = [];
-  const totalScripts = 231019; // Sum from mock data
-  
-  for (let i = 1; i <= days; i++) {
-    // Create zigzag pattern with overall upward trend
-    const baseProgress = (i / days) * 100;
-    const randomVariation = (Math.sin(i * 0.5) * 5) + (Math.random() * 8 - 4);
-    const percentage = Math.max(0, Math.min(baseProgress + randomVariation, 100));
-    const scriptsMarked = Math.round((percentage / 100) * totalScripts);
-    
-    data.push({
-      day: `Day ${i}`,
-      scriptsMarked,
-      percentage: Number(percentage.toFixed(1))
-    });
-  }
-  
-  return data;
-};
+interface ProgressChartProps {
+  data: ExamRecord[];
+}
 
-export const ProgressChart = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState(30);
-  const progressData = generateProgressData(selectedPeriod);
+export const ProgressChart = ({ data }: ProgressChartProps) => {
+  const [sortBy, setSortBy] = useState<'allocated' | 'examiners' | 'reconciled'>('allocated');
 
-  const periods = [
-    { value: 7, label: '7 Days' },
-    { value: 14, label: '14 Days' },
-    { value: 21, label: '21 Days' },
-    { value: 30, label: '30 Days' }
+  // Prepare data for subject comparison
+  const chartData = data
+    .map(item => ({
+      subject: item.paperLongName.length > 20 
+        ? item.paperLongName.substring(0, 20) + '...' 
+        : item.paperLongName,
+      fullName: item.paperLongName,
+      allocated: item.totalAllocated,
+      examiners: item.totalExaminers,
+      reconciled: item.totalReconciled,
+      paperCode: item.paperCode
+    }))
+    .sort((a, b) => b[sortBy] - a[sortBy]);
+
+  const sortOptions = [
+    { value: 'allocated', label: 'Scripts Allocated' },
+    { value: 'examiners', label: 'Total Examiners' },
+    { value: 'reconciled', label: 'Scripts Reconciled' }
   ];
 
   return (
@@ -42,62 +37,68 @@ export const ProgressChart = () => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-blue-900">Marking Progress Over Time</CardTitle>
-            <p className="text-sm text-gray-600">Daily marking progress with zigzag pattern showing real-time fluctuations</p>
+            <CardTitle className="text-blue-900">Subject Performance Comparison</CardTitle>
+            <p className="text-sm text-gray-600">Compare subjects by different metrics - scrollable chart</p>
           </div>
           <div className="flex gap-2">
-            {periods.map((period) => (
+            {sortOptions.map((option) => (
               <Button
-                key={period.value}
-                variant={selectedPeriod === period.value ? "default" : "outline"}
+                key={option.value}
+                variant={sortBy === option.value ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSelectedPeriod(period.value)}
-                className={selectedPeriod === period.value ? "bg-blue-900 hover:bg-blue-800" : ""}
+                onClick={() => setSortBy(option.value as 'allocated' | 'examiners' | 'reconciled')}
+                className={sortBy === option.value ? "bg-blue-900 hover:bg-blue-800" : ""}
               >
-                {period.label}
+                {option.label}
               </Button>
             ))}
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={350}>
-          <LineChart data={progressData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="day" 
-              tick={{ fontSize: 12 }}
-              interval={selectedPeriod > 14 ? 4 : 1}
-            />
-            <YAxis yAxisId="scripts" orientation="left" />
-            <YAxis yAxisId="percentage" orientation="right" />
-            <Tooltip 
-              formatter={(value: any, name: string) => [
-                name === 'scriptsMarked' ? value.toLocaleString() + ' scripts' : value + '%',
-                name === 'scriptsMarked' ? 'Scripts Marked' : 'Progress %'
-              ]}
-            />
-            <Line 
-              yAxisId="scripts"
-              type="monotone" 
-              dataKey="scriptsMarked" 
-              stroke="#1e3a8a" 
-              strokeWidth={2}
-              dot={{ fill: '#fbbf24', strokeWidth: 2, r: 3 }}
-              name="scriptsMarked"
-            />
-            <Line 
-              yAxisId="percentage"
-              type="monotone" 
-              dataKey="percentage" 
-              stroke="#fbbf24" 
-              strokeWidth={2}
-              strokeDasharray="5 5"
-              dot={{ fill: '#1e3a8a', strokeWidth: 2, r: 3 }}
-              name="percentage"
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <div className="overflow-x-auto">
+          <div style={{ width: Math.max(800, chartData.length * 60) }}>
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart data={chartData} margin={{ bottom: 60, left: 20, right: 20, top: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="subject" 
+                  tick={{ fontSize: 10 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                  interval={0}
+                />
+                <YAxis />
+                <Tooltip 
+                  formatter={(value: any) => [
+                    value.toLocaleString(),
+                    sortBy === 'allocated' ? 'Scripts Allocated' :
+                    sortBy === 'examiners' ? 'Total Examiners' : 'Scripts Reconciled'
+                  ]}
+                  labelFormatter={(label) => {
+                    const item = chartData.find(d => d.subject === label);
+                    return item?.fullName || label;
+                  }}
+                />
+                <Bar 
+                  dataKey={sortBy}
+                  fill={sortBy === 'allocated' ? '#1e3a8a' : sortBy === 'examiners' ? '#fbbf24' : '#10b981'}
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <strong>Chart shows:</strong> {
+              sortBy === 'allocated' ? 'Number of scripts allocated per subject' :
+              sortBy === 'examiners' ? 'Number of examiners per subject' : 
+              'Number of scripts reconciled per subject'
+            }
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
