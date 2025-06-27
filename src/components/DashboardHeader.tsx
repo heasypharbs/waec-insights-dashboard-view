@@ -11,7 +11,7 @@ export const DashboardHeader = ({ totalVenues }: DashboardHeaderProps) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <img 
-            src="/waec-logo.png" 
+            src="public/waec-logo.png" 
             alt="WAEC Logo - West African Examinations Council"
             className="h-16 w-16 object-contain"
             onError={(e) => {
@@ -21,7 +21,7 @@ export const DashboardHeader = ({ totalVenues }: DashboardHeaderProps) => {
           />
           <div>
             <h1 className="text-3xl font-bold mb-2">WAEC Marking Venue Dashboard</h1>
-            <p className="text-blue-100 text-lg">Examination Marking Progress Report - All Centers</p>
+            <p className="text-blue-100 text-lg">Examination Marking Progress Report </p>
           </div>
         </div>
         <div className="text-right">

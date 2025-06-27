@@ -38,7 +38,7 @@ export const ProgressChart = ({ data }: ProgressChartProps) => {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-blue-900">Subject Performance Comparison</CardTitle>
-            <p className="text-sm text-gray-600">Compare subjects by different metrics - scrollable chart</p>
+            <p className="text-sm text-gray-600">Compare subjects by different metrics</p>
           </div>
           <div className="flex gap-2">
             {sortOptions.map((option) => (

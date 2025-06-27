@@ -44,7 +44,7 @@ export const Dashboard = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-900 mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading WAEC Dashboard...</p>
+          <p className="text-lg text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -54,7 +54,7 @@ export const Dashboard = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-xl text-red-600 mb-4">Error loading dashboard data</p>
+          <p className="text-xl text-red-600 mb-4">Error loading data</p>
           <button 
             onClick={() => setRefreshKey(prev => prev + 1)}
             className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800"
