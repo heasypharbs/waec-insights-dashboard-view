@@ -7,7 +7,7 @@ interface SubjectChartProps {
   data: ExamRecord[];
 }
 
-const COLORS = ['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#eff6ff'];
+const COLORS = ['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#fbbf24'];
 
 export const SubjectChart = ({ data }: SubjectChartProps) => {
   // Prepare data for bar chart - top 10 subjects by allocation
@@ -21,21 +21,30 @@ export const SubjectChart = ({ data }: SubjectChartProps) => {
       fullName: item.paperLongName
     }));
 
-  // Prepare data for pie chart - subject categories
-  const pieChartData = [
-    { name: 'Languages', value: data.filter(d => d.paperCode.startsWith('3')).length, color: '#1e3a8a' },
-    { name: 'Sciences', value: data.filter(d => d.paperCode.startsWith('5')).length, color: '#3b82f6' },
-    { name: 'Social Studies', value: data.filter(d => d.paperCode.startsWith('2')).length, color: '#60a5fa' },
-    { name: 'Mathematics', value: data.filter(d => d.paperCode.startsWith('4')).length, color: '#93c5fd' },
-    { name: 'Technical', value: data.filter(d => d.paperCode.startsWith('6')).length, color: '#dbeafe' },
-    { name: 'Others', value: data.filter(d => !['2','3','4','5','6'].includes(d.paperCode[0])).length, color: '#eff6ff' }
-  ].filter(item => item.value > 0);
+  // Subject category data based on paper codes with actual counts
+  const subjectCategories = {
+    'Business Studies': data.filter(d => d.paperCode.startsWith('1')).length,
+    'Social Studies': data.filter(d => d.paperCode.startsWith('2')).length,
+    'Languages': data.filter(d => d.paperCode.startsWith('3')).length,
+    'Mathematics': data.filter(d => d.paperCode.startsWith('4')).length,
+    'Sciences': data.filter(d => d.paperCode.startsWith('5')).length,
+    'Technical/Vocational': data.filter(d => d.paperCode.startsWith('6') || d.paperCode.startsWith('7')).length
+  };
+
+  const pieChartData = Object.entries(subjectCategories)
+    .filter(([_, count]) => count > 0)
+    .map(([category, count], index) => ({
+      name: category,
+      value: count,
+      color: COLORS[index % COLORS.length]
+    }));
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-blue-900">Top Subjects by Script Allocation</CardTitle>
+          <p className="text-sm text-gray-600">Subjects with highest number of allocated scripts</p>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
@@ -68,6 +77,7 @@ export const SubjectChart = ({ data }: SubjectChartProps) => {
       <Card>
         <CardHeader>
           <CardTitle className="text-blue-900">Subject Categories Distribution</CardTitle>
+          <p className="text-sm text-gray-600">Number of subjects per category</p>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
@@ -77,7 +87,7 @@ export const SubjectChart = ({ data }: SubjectChartProps) => {
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                label={({ name, value }) => `${name}: ${value}`}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
@@ -86,7 +96,7 @@ export const SubjectChart = ({ data }: SubjectChartProps) => {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip formatter={(value) => [`${value} subjects`, 'Count']} />
             </PieChart>
           </ResponsiveContainer>
         </CardContent>
