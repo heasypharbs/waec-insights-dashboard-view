@@ -7,7 +7,7 @@ interface SubjectChartProps {
   data: ExamRecord[];
 }
 
-const COLORS = ['#16a34a', '#22c55e', '#4ade80', '#86efac', '#bbf7d0', '#dcfce7'];
+const COLORS = ['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#eff6ff'];
 
 export const SubjectChart = ({ data }: SubjectChartProps) => {
   // Prepare data for bar chart - top 10 subjects by allocation
@@ -23,19 +23,19 @@ export const SubjectChart = ({ data }: SubjectChartProps) => {
 
   // Prepare data for pie chart - subject categories
   const pieChartData = [
-    { name: 'Languages', value: data.filter(d => d.paperCode.startsWith('3')).length, color: '#16a34a' },
-    { name: 'Sciences', value: data.filter(d => d.paperCode.startsWith('5')).length, color: '#22c55e' },
-    { name: 'Social Studies', value: data.filter(d => d.paperCode.startsWith('2')).length, color: '#4ade80' },
-    { name: 'Mathematics', value: data.filter(d => d.paperCode.startsWith('4')).length, color: '#86efac' },
-    { name: 'Technical', value: data.filter(d => d.paperCode.startsWith('6')).length, color: '#bbf7d0' },
-    { name: 'Others', value: data.filter(d => !['2','3','4','5','6'].includes(d.paperCode[0])).length, color: '#dcfce7' }
+    { name: 'Languages', value: data.filter(d => d.paperCode.startsWith('3')).length, color: '#1e3a8a' },
+    { name: 'Sciences', value: data.filter(d => d.paperCode.startsWith('5')).length, color: '#3b82f6' },
+    { name: 'Social Studies', value: data.filter(d => d.paperCode.startsWith('2')).length, color: '#60a5fa' },
+    { name: 'Mathematics', value: data.filter(d => d.paperCode.startsWith('4')).length, color: '#93c5fd' },
+    { name: 'Technical', value: data.filter(d => d.paperCode.startsWith('6')).length, color: '#dbeafe' },
+    { name: 'Others', value: data.filter(d => !['2','3','4','5','6'].includes(d.paperCode[0])).length, color: '#eff6ff' }
   ].filter(item => item.value > 0);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-green-700">Top Subjects by Script Allocation</CardTitle>
+          <CardTitle className="text-blue-900">Top Subjects by Script Allocation</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
@@ -50,15 +50,16 @@ export const SubjectChart = ({ data }: SubjectChartProps) => {
               />
               <YAxis />
               <Tooltip 
-                formatter={[
-                  (value: any, name: string) => [value.toLocaleString(), name === 'allocated' ? 'Scripts Allocated' : 'Examiners'],
+                formatter={(value: any, name: string) => [
+                  value.toLocaleString(), 
+                  name === 'allocated' ? 'Scripts Allocated' : 'Examiners'
                 ]}
                 labelFormatter={(label) => {
                   const item = barChartData.find(d => d.name === label);
                   return item?.fullName || label;
                 }}
               />
-              <Bar dataKey="allocated" fill="#16a34a" name="allocated" />
+              <Bar dataKey="allocated" fill="#1e3a8a" name="allocated" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -66,7 +67,7 @@ export const SubjectChart = ({ data }: SubjectChartProps) => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-green-700">Subject Categories Distribution</CardTitle>
+          <CardTitle className="text-blue-900">Subject Categories Distribution</CardTitle>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>

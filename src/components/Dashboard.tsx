@@ -6,6 +6,7 @@ import { dashboardService } from '../services/dashboardService';
 import { DashboardHeader } from './DashboardHeader';
 import { MetricCard } from './MetricCard';
 import { SubjectChart } from './SubjectChart';
+import { ProgressChart } from './ProgressChart';
 import { ExamTable } from './ExamTable';
 import { ExamRecord } from '../data/mockDashboardData';
 
@@ -32,7 +33,7 @@ export const Dashboard = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-900 mx-auto mb-4"></div>
           <p className="text-lg text-gray-600">Loading WAEC Dashboard...</p>
         </div>
       </div>
@@ -46,7 +47,7 @@ export const Dashboard = () => {
           <p className="text-xl text-red-600 mb-4">Error loading dashboard data</p>
           <button 
             onClick={() => setRefreshKey(prev => prev + 1)}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            className="bg-blue-900 text-white px-4 py-2 rounded hover:bg-blue-800"
           >
             Retry
           </button>
@@ -66,45 +67,48 @@ export const Dashboard = () => {
             title="Total Subjects"
             value={totalSubjects}
             icon={BookOpen}
-            color="bg-green-600"
+            color="bg-blue-900"
             trend={{ value: 5.2, isPositive: true }}
           />
           <MetricCard
             title="Total Examiners"
             value={totalExaminers}
             icon={Users}
-            color="bg-blue-600"
+            color="bg-blue-700"
             trend={{ value: 2.1, isPositive: true }}
           />
           <MetricCard
             title="Scripts Allocated"
             value={totalScriptsAllocated}
             icon={FileText}
-            color="bg-purple-600"
+            color="bg-blue-600"
             trend={{ value: 8.3, isPositive: true }}
           />
           <MetricCard
             title="Scripts Reconciled"
             value={totalReconciled}
             icon={Target}
-            color="bg-orange-600"
+            color="bg-yellow-500"
             trend={{ value: 0, isPositive: true }}
           />
           <MetricCard
             title="Avg Scripts/Examiner"
             value={averageScriptsPerExaminer}
             icon={Calculator}
-            color="bg-indigo-600"
+            color="bg-blue-800"
             trend={{ value: 1.5, isPositive: false }}
           />
           <MetricCard
             title="Completion Rate"
             value={`${completionRate.toFixed(1)}%`}
             icon={TrendingUp}
-            color="bg-red-600"
+            color="bg-yellow-600"
             trend={{ value: 0, isPositive: true }}
           />
         </div>
+
+        {/* Progress Chart */}
+        <ProgressChart />
 
         {/* Charts */}
         <SubjectChart data={examData} />

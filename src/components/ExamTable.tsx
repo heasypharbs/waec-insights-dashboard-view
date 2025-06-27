@@ -48,7 +48,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-green-700">Detailed Subject Report</CardTitle>
+          <CardTitle className="text-blue-900">Detailed Subject Report</CardTitle>
           <div className="flex items-center gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -76,22 +76,22 @@ export const ExamTable = ({ data }: ExamTableProps) => {
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left p-3 font-semibold text-gray-700">
-                  <button onClick={() => handleSort('paperCode')} className="hover:text-green-600">
+                  <button onClick={() => handleSort('paperCode')} className="hover:text-blue-900">
                     Paper Code {sortField === 'paperCode' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </button>
                 </th>
                 <th className="text-left p-3 font-semibold text-gray-700">
-                  <button onClick={() => handleSort('paperLongName')} className="hover:text-green-600">
+                  <button onClick={() => handleSort('paperLongName')} className="hover:text-blue-900">
                     Subject {sortField === 'paperLongName' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </button>
                 </th>
                 <th className="text-left p-3 font-semibold text-gray-700">
-                  <button onClick={() => handleSort('totalExaminers')} className="hover:text-green-600">
+                  <button onClick={() => handleSort('totalExaminers')} className="hover:text-blue-900">
                     Examiners {sortField === 'totalExaminers' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </button>
                 </th>
                 <th className="text-left p-3 font-semibold text-gray-700">
-                  <button onClick={() => handleSort('totalAllocated')} className="hover:text-green-600">
+                  <button onClick={() => handleSort('totalAllocated')} className="hover:text-blue-900">
                     Scripts Allocated {sortField === 'totalAllocated' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </button>
                 </th>
@@ -106,7 +106,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
                 
                 return (
                   <tr key={item.paperCode} className={`border-b border-gray-100 hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                    <td className="p-3 font-mono text-sm text-blue-600">{item.paperCode}</td>
+                    <td className="p-3 font-mono text-sm text-blue-700">{item.paperCode}</td>
                     <td className="p-3 font-medium">{item.paperLongName}</td>
                     <td className="p-3">{item.totalExaminers.toLocaleString()}</td>
                     <td className="p-3 font-semibold">{item.totalAllocated.toLocaleString()}</td>
@@ -115,7 +115,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
                       <div className="flex items-center gap-2">
                         <div className="w-16 bg-gray-200 rounded-full h-2">
                           <div 
-                            className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                            className="bg-blue-900 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${Math.min(progress, 100)}%` }}
                           ></div>
                         </div>
