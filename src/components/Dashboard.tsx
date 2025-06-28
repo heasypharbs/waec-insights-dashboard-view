@@ -38,6 +38,10 @@ export const Dashboard = () => {
 
   // Get venue statistics
   const totalVenues = Array.from(new Set(allExamData.map(item => item.mvCode))).length;
+  
+  // Get current venue name
+  const currentVenueData = examData.length > 0 ? examData[0] : null;
+  const venueName = currentVenueData ? currentVenueData.mvName : '';
 
   if (isLoading) {
     return (
@@ -69,7 +73,11 @@ export const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
-        <DashboardHeader totalVenues={totalVenues} />
+        <DashboardHeader 
+          totalVenues={totalVenues} 
+          selectedVenue={selectedVenue}
+          venueName={venueName}
+        />
         
         {/* Marking Venue Filter */}
         <MarkingVenueFilter 
@@ -135,7 +143,7 @@ export const Dashboard = () => {
 
         {/* Footer */}
         <div className="mt-8 text-center text-gray-600 text-sm">
-          <p>WAEC Marking Venue Dashboard • Last updated: {new Date().toLocaleString()}</p>
+          <p>WAEC Marking Dashboard • Last updated: {new Date().toLocaleString()}</p>
           <p className="mt-1">
             Showing {selectedVenue === 'all' ? 'all venues' : 'selected venue'} • 
             Data refreshes automatically every 30 seconds

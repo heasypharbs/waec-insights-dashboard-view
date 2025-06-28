@@ -61,6 +61,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
 
   const exportToCSV = () => {
     const headers = ['Paper Code', 'Subject', 'Marking Zone', 'Venue Code', 'Venue Name', 'Examiners', 'Scripts Allocated', 'Scripts Reconciled', 'Scripts/Examiner', 'Completion Rate'];
+    // Export ALL filtered data, not just current page
     const csvData = filteredData.map(item => [
       item.paperCode,
       item.paperLongName,
