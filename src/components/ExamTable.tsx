@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -61,7 +60,8 @@ export const ExamTable = ({ data }: ExamTableProps) => {
 
   const exportToCSV = () => {
     const headers = ['Paper Code', 'Subject', 'Marking Zone', 'Venue Code', 'Venue Name', 'Examiners', 'Scripts Allocated', 'Scripts Reconciled', 'Scripts/Examiner', 'Completion Rate'];
-    // Export ALL filtered data, not just current page
+    
+    // Export ALL filtered data (not just current page)
     const csvData = filteredData.map(item => [
       item.paperCode,
       item.paperLongName,
@@ -79,17 +79,89 @@ export const ExamTable = ({ data }: ExamTableProps) => {
       .map(row => row.map(cell => `"${cell}"`).join(','))
       .join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `waec-marking-report-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `waec-detailed-subject-report-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+    
+    console.log(`Exported ${filteredData.length} records to CSV`);
   };
 
   const handlePrint = () => {
-    window.print();
+    // Create a new window with all the filtered data for printing
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>WAEC Detailed Subject Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+            th { background-color: #f2f2f2; font-weight: bold; }
+            .header { text-align: center; margin-bottom: 20px; }
+            .progress-bar { width: 50px; height: 10px; background-color: #e0e0e0; position: relative; }
+            .progress-fill { height: 100%; background-color: #4CAF50; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>WAEC Detailed Subject Report</h1>
+            <p>Generated on: ${new Date().toLocaleString()}</p>
+            <p>Total Records: ${filteredData.length}</p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Paper Code</th>
+                <th>Subject</th>
+                <th>Marking Zone</th>
+                <th>Venue Code</th>
+                <th>Venue Name</th>
+                <th>Examiners</th>
+                <th>Scripts Allocated</th>
+                <th>Scripts Reconciled</th>
+                <th>Scripts/Examiner</th>
+                <th>Completion Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredData.map(item => {
+                const scriptsPerExaminer = item.totalExaminers > 0 ? Math.round(item.totalAllocated / item.totalExaminers) : 0;
+                const completionRate = getProgressPercentage(item.totalAllocated, item.totalReconciled);
+                return `
+                  <tr>
+                    <td>${item.paperCode}</td>
+                    <td>${item.paperLongName}</td>
+                    <td>${item.markingZoneCode}</td>
+                    <td>${item.mvCode}</td>
+                    <td>${item.mvName}</td>
+                    <td>${item.totalExaminers.toLocaleString()}</td>
+                    <td>${item.totalAllocated.toLocaleString()}</td>
+                    <td>${item.totalReconciled.toLocaleString()}</td>
+                    <td>${scriptsPerExaminer}</td>
+                    <td>${completionRate.toFixed(1)}%</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+    
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
   };
 
   return (
@@ -116,11 +188,11 @@ export const ExamTable = ({ data }: ExamTableProps) => {
             </Button>
             <Button variant="outline" size="sm" onClick={exportToCSV}>
               <FileText className="h-4 w-4 mr-2" />
-              Export CSV
+              Export CSV ({filteredData.length} records)
             </Button>
             <Button variant="outline" size="sm" onClick={handlePrint}>
               <Printer className="h-4 w-4 mr-2" />
-              Print
+              Print All ({filteredData.length} records)
             </Button>
           </div>
         </div>

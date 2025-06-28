@@ -3,6 +3,7 @@ export const mockDashboardData = {
   "code": "200",
   "message": "List of available record(s) in the collection",
   "returnData": [
+    // Lagos Venue (mvCode: 1)
     {
       "paperCode": "109222",
       "paperLongName": "BOOK KEEPING 2",
@@ -272,6 +273,192 @@ export const mockDashboardData = {
       "totalAllocated": 1627,
       "totalReconciled": 0,
       "mvName": "LAGOS (OBANIKORO/MARYLAND)"
+    },
+
+    // Abuja Venue (mvCode: 2)
+    {
+      "paperCode": "109222",
+      "paperLongName": "BOOK KEEPING 2",
+      "mvCode": 2,
+      "markingZoneCode": "900",
+      "totalExaminers": 89,
+      "totalAllocated": 2156,
+      "totalReconciled": 1256,
+      "mvName": "ABUJA (GARKI/WUSE)"
+    },
+    {
+      "paperCode": "112222",
+      "paperLongName": "MARKETING 2",
+      "mvCode": 2,
+      "markingZoneCode": "900",
+      "totalExaminers": 178,
+      "totalAllocated": 9834,
+      "totalReconciled": 5234,
+      "mvName": "ABUJA (GARKI/WUSE)"
+    },
+    {
+      "paperCode": "203222",
+      "paperLongName": "ECONOMICS 2",
+      "mvCode": 2,
+      "markingZoneCode": "900",
+      "totalExaminers": 267,
+      "totalAllocated": 18945,
+      "totalReconciled": 12345,
+      "mvName": "ABUJA (GARKI/WUSE)"
+    },
+    {
+      "paperCode": "205222",
+      "paperLongName": "GOVERNMENT 2",
+      "mvCode": 2,
+      "markingZoneCode": "900",
+      "totalExaminers": 234,
+      "totalAllocated": 8756,
+      "totalReconciled": 7234,
+      "mvName": "ABUJA (GARKI/WUSE)"
+    },
+    {
+      "paperCode": "302223",
+      "paperLongName": "ENGLISH LANG 2",
+      "mvCode": 2,
+      "markingZoneCode": "900",
+      "totalExaminers": 456,
+      "totalAllocated": 28934,
+      "totalReconciled": 18456,
+      "mvName": "ABUJA (GARKI/WUSE)"
+    },
+    {
+      "paperCode": "401222",
+      "paperLongName": "FURTHER MATHS 2",
+      "mvCode": 2,
+      "markingZoneCode": "900",
+      "totalExaminers": 345,
+      "totalAllocated": 2834,
+      "totalReconciled": 2456,
+      "mvName": "ABUJA (GARKI/WUSE)"
+    },
+
+    // Kano Venue (mvCode: 3)
+    {
+      "paperCode": "109222",
+      "paperLongName": "BOOK KEEPING 2",
+      "mvCode": 3,
+      "markingZoneCode": "700",
+      "totalExaminers": 125,
+      "totalAllocated": 2890,
+      "totalReconciled": 2890,
+      "mvName": "KANO (NASSARAWA/FAGGE)"
+    },
+    {
+      "paperCode": "112222",
+      "paperLongName": "MARKETING 2",
+      "mvCode": 3,
+      "markingZoneCode": "700",
+      "totalExaminers": 198,
+      "totalAllocated": 12456,
+      "totalReconciled": 10234,
+      "mvName": "KANO (NASSARAWA/FAGGE)"
+    },
+    {
+      "paperCode": "203222",
+      "paperLongName": "ECONOMICS 2",
+      "mvCode": 3,
+      "markingZoneCode": "700",
+      "totalExaminers": 289,
+      "totalAllocated": 21567,
+      "totalReconciled": 19345,
+      "mvName": "KANO (NASSARAWA/FAGGE)"
+    },
+    {
+      "paperCode": "208222",
+      "paperLongName": "ISLAMIC STUDIES 2",
+      "mvCode": 3,
+      "markingZoneCode": "700",
+      "totalExaminers": 156,
+      "totalAllocated": 8934,
+      "totalReconciled": 8934,
+      "mvName": "KANO (NASSARAWA/FAGGE)"
+    },
+    {
+      "paperCode": "302223",
+      "paperLongName": "ENGLISH LANG 2",
+      "mvCode": 3,
+      "markingZoneCode": "700",
+      "totalExaminers": 567,
+      "totalAllocated": 34567,
+      "totalReconciled": 28934,
+      "mvName": "KANO (NASSARAWA/FAGGE)"
+    },
+    {
+      "paperCode": "401222",
+      "paperLongName": "FURTHER MATHS 2",
+      "mvCode": 3,
+      "markingZoneCode": "700",
+      "totalExaminers": 234,
+      "totalAllocated": 3456,
+      "totalReconciled": 3456,
+      "mvName": "KANO (NASSARAWA/FAGGE)"
+    },
+
+    // Port Harcourt Venue (mvCode: 4)
+    {
+      "paperCode": "109222",
+      "paperLongName": "BOOK KEEPING 2",
+      "mvCode": 4,
+      "markingZoneCode": "600",
+      "totalExaminers": 98,
+      "totalAllocated": 2134,
+      "totalReconciled": 1567,
+      "mvName": "PORT HARCOURT (TRANS AMADI/MILE 3)"
+    },
+    {
+      "paperCode": "112222",
+      "paperLongName": "MARKETING 2",
+      "mvCode": 4,
+      "markingZoneCode": "600",
+      "totalExaminers": 145,
+      "totalAllocated": 8756,
+      "totalReconciled": 6234,
+      "mvName": "PORT HARCOURT (TRANS AMADI/MILE 3)"
+    },
+    {
+      "paperCode": "203222",
+      "paperLongName": "ECONOMICS 2",
+      "mvCode": 4,
+      "markingZoneCode": "600",
+      "totalExaminers": 234,
+      "totalAllocated": 15678,
+      "totalReconciled": 12345,
+      "mvName": "PORT HARCOURT (TRANS AMADI/MILE 3)"
+    },
+    {
+      "paperCode": "302223",
+      "paperLongName": "ENGLISH LANG 2",
+      "mvCode": 4,
+      "markingZoneCode": "600",
+      "totalExaminers": 389,
+      "totalAllocated": 23456,
+      "totalReconciled": 18567,
+      "mvName": "PORT HARCOURT (TRANS AMADI/MILE 3)"
+    },
+    {
+      "paperCode": "502223",
+      "paperLongName": "AGRIC. SCIENCE 2",
+      "mvCode": 4,
+      "markingZoneCode": "600",
+      "totalExaminers": 178,
+      "totalAllocated": 9876,
+      "totalReconciled": 7654,
+      "mvName": "PORT HARCOURT (TRANS AMADI/MILE 3)"
+    },
+    {
+      "paperCode": "401222",
+      "paperLongName": "FURTHER MATHS 2",
+      "mvCode": 4,
+      "markingZoneCode": "600",
+      "totalExaminers": 167,
+      "totalAllocated": 1987,
+      "totalReconciled": 1654,
+      "mvName": "PORT HARCOURT (TRANS AMADI/MILE 3)"
     }
   ]
 };
