@@ -59,13 +59,25 @@ export const ExamTable = ({ data }: ExamTableProps) => {
     return allocated > 0 ? (reconciled / allocated) * 100 : 0;
   };
 
+  // Function to get full paper name with paper number
+  const getFullPaperName = (paperCode: string, paperLongName: string) => {
+    // Extract paper number from paper code (e.g., "ENG2" -> "Paper 2")
+    const paperMatch = paperCode.match(/(\d+)$/);
+    const paperNumber = paperMatch ? paperMatch[1] : '';
+    
+    if (paperNumber) {
+      return `${paperLongName} (Paper ${paperNumber})`;
+    }
+    return paperLongName;
+  };
+
   const exportToCSV = () => {
     const headers = ['Paper Code', 'Subject', 'Marking Zone', 'Venue Code', 'Venue Name', 'Examiners', 'Scripts Allocated', 'Scripts Reconciled', 'Scripts/Examiner', 'Completion Rate'];
     
     // Export ALL processed data (not just current page)
     const csvData = processedData.map(item => [
       item.paperCode,
-      item.paperLongName,
+      getFullPaperName(item.paperCode, item.paperLongName),
       item.markingZoneCode,
       item.mvCode,
       item.mvName,
@@ -141,7 +153,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
                 return `
                   <tr>
                     <td>${item.paperCode}</td>
-                    <td>${item.paperLongName}</td>
+                    <td>${getFullPaperName(item.paperCode, item.paperLongName)}</td>
                     <td>${item.markingZoneCode}</td>
                     <td>${item.mvCode}</td>
                     <td>${item.mvName}</td>
@@ -227,8 +239,8 @@ export const ExamTable = ({ data }: ExamTableProps) => {
                   <tr key={`${item.paperCode}-${item.mvCode}`} className={`border-b border-gray-100 hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                     <td className="p-3 font-mono text-sm text-blue-700">{item.paperCode}</td>
                     <td className="p-3 font-medium max-w-xs">
-                      <div className="truncate" title={item.paperLongName}>
-                        {item.paperLongName}
+                      <div className="truncate" title={getFullPaperName(item.paperCode, item.paperLongName)}>
+                        {getFullPaperName(item.paperCode, item.paperLongName)}
                       </div>
                     </td>
                     <td className="p-3 text-center">
