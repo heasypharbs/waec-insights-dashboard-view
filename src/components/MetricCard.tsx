@@ -20,10 +20,10 @@ export const MetricCard = ({ title, value, icon: Icon, trend, color }: MetricCar
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-            <p className="text-3xl font-bold text-gray-900">{value.toLocaleString()}</p>
-            {trend && (
+            <p className="text-3xl font-bold text-gray-900">{typeof value === 'number' ? value.toLocaleString() : value}</p>
+            {trend && trend.value > 0 && (
               <p className={`text-sm ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                {trend.isPositive ? '+' : ''}{trend.value}% from last period
+                {trend.isPositive ? '+' : '-'}{trend.value.toFixed(2)}% from last period
               </p>
             )}
           </div>

@@ -41,7 +41,7 @@ export const Dashboard = () => {
   const calculateTrend = (current: number, previous: number | null) => {
     if (previous === null || previous === 0) return { value: 0, isPositive: true };
     const change = ((current - previous) / previous) * 100;
-    return { value: Math.abs(change), isPositive: change >= 0 };
+    return { value: parseFloat(Math.abs(change).toFixed(2)), isPositive: change >= 0 };
   };
 
   // Store current metrics as previous for next comparison
@@ -164,7 +164,7 @@ export const Dashboard = () => {
           />
           <MetricCard
             title="Completion Rate"
-            value={`${completionRate.toFixed(1)}%`}
+            value={`${completionRate.toFixed(2)}%`}
             icon={TrendingUp}
             color="bg-yellow-600"
             trend={calculateTrend(completionRate, previousMetrics?.completionRate)}

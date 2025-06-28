@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -72,7 +71,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
   };
 
   const exportToCSV = () => {
-    const headers = ['Paper Code', 'Subject', 'Marking Zone', 'Venue Code', 'Venue Name', 'Examiners', 'Scripts Allocated', 'Scripts Reconciled', 'Scripts/Examiner', 'Completion Rate'];
+    const headers = ['Paper Code', 'Subject', 'Marking Zone', 'Venue Code', 'Venue Name', 'Total Examiners', 'Scripts Allocated', 'Scripts Reconciled', 'Completion Rate'];
     
     // Export ALL processed data (not just current page)
     const csvData = processedData.map(item => [
@@ -84,8 +83,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
       item.totalExaminers,
       item.totalAllocated,
       item.totalReconciled,
-      item.totalExaminers > 0 ? Math.round(item.totalAllocated / item.totalExaminers) : 0,
-      `${getProgressPercentage(item.totalAllocated, item.totalReconciled).toFixed(1)}%`
+      `${getProgressPercentage(item.totalAllocated, item.totalReconciled).toFixed(2)}%`
     ]);
 
     const csvContent = [headers, ...csvData]
@@ -121,8 +119,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
             th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
             th { background-color: #f2f2f2; font-weight: bold; }
             .header { text-align: center; margin-bottom: 20px; }
-            .progress-bar { width: 50px; height: 10px; background-color: #e0e0e0; position: relative; }
-            .progress-fill { height: 100%; background-color: #4CAF50; }
+            .row-counter { text-align: center; font-weight: bold; }
           </style>
         </head>
         <body>
@@ -134,24 +131,24 @@ export const ExamTable = ({ data }: ExamTableProps) => {
           <table>
             <thead>
               <tr>
+                <th>#</th>
                 <th>Paper Code</th>
                 <th>Subject</th>
                 <th>Marking Zone</th>
                 <th>Venue Code</th>
                 <th>Venue Name</th>
-                <th>Examiners</th>
+                <th>Total Examiners</th>
                 <th>Scripts Allocated</th>
                 <th>Scripts Reconciled</th>
-                <th>Scripts/Examiner</th>
                 <th>Completion Rate</th>
               </tr>
             </thead>
             <tbody>
-              ${processedData.map(item => {
-                const scriptsPerExaminer = item.totalExaminers > 0 ? Math.round(item.totalAllocated / item.totalExaminers) : 0;
+              ${processedData.map((item, index) => {
                 const completionRate = getProgressPercentage(item.totalAllocated, item.totalReconciled);
                 return `
                   <tr>
+                    <td class="row-counter">${index + 1}</td>
                     <td>${item.paperCode}</td>
                     <td>${getFullPaperName(item.paperCode, item.paperLongName)}</td>
                     <td>${item.markingZoneCode}</td>
@@ -160,8 +157,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
                     <td>${item.totalExaminers.toLocaleString()}</td>
                     <td>${item.totalAllocated.toLocaleString()}</td>
                     <td>${item.totalReconciled.toLocaleString()}</td>
-                    <td>${scriptsPerExaminer}</td>
-                    <td>${completionRate.toFixed(1)}%</td>
+                    <td>${completionRate.toFixed(2)}%</td>
                   </tr>
                 `;
               }).join('')}
@@ -213,7 +209,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
                 <th className="text-left p-3 font-semibold text-gray-700">Venue Info</th>
                 <th className="text-left p-3 font-semibold text-gray-700">
                   <button onClick={() => handleSort('totalExaminers')} className="hover:text-blue-900">
-                    Examiners {sortField === 'totalExaminers' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    Total Examiners {sortField === 'totalExaminers' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </button>
                 </th>
                 <th className="text-left p-3 font-semibold text-gray-700">
@@ -226,13 +222,11 @@ export const ExamTable = ({ data }: ExamTableProps) => {
                     Scripts Reconciled {sortField === 'totalReconciled' && (sortDirection === 'asc' ? '↑' : '↓')}
                   </button>
                 </th>
-                <th className="text-left p-3 font-semibold text-gray-700">Scripts/Examiner</th>
                 <th className="text-left p-3 font-semibold text-gray-700">Completion Rate</th>
               </tr>
             </thead>
             <tbody>
               {paginatedData.map((item, index) => {
-                const scriptsPerExaminer = item.totalExaminers > 0 ? Math.round(item.totalAllocated / item.totalExaminers) : 0;
                 const completionRate = getProgressPercentage(item.totalAllocated, item.totalReconciled);
                 
                 return (
@@ -263,7 +257,6 @@ export const ExamTable = ({ data }: ExamTableProps) => {
                         {item.totalReconciled.toLocaleString()}
                       </span>
                     </td>
-                    <td className="p-3 text-center">{scriptsPerExaminer}</td>
                     <td className="p-3">
                       <div className="flex items-center gap-2">
                         <div className="w-12 bg-gray-200 rounded-full h-2">
@@ -272,7 +265,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
                             style={{ width: `${Math.min(completionRate, 100)}%` }}
                           ></div>
                         </div>
-                        <span className="text-sm text-gray-600 min-w-12">{completionRate.toFixed(1)}%</span>
+                        <span className="text-sm text-gray-600 min-w-16">{completionRate.toFixed(2)}%</span>
                       </div>
                     </td>
                   </tr>
