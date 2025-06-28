@@ -1,8 +1,8 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, Download, FileText, Printer, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, Printer, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ExamRecord } from '../data/mockDashboardData';
 import {
   Pagination,
@@ -18,11 +18,10 @@ interface ExamTableProps {
 }
 
 export const ExamTable = ({ data }: ExamTableProps) => {
-  const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<keyof ExamRecord>('totalAllocated');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 15;
 
   const handleSort = (field: keyof ExamRecord) => {
     if (field === sortField) {
@@ -34,10 +33,12 @@ export const ExamTable = ({ data }: ExamTableProps) => {
     setCurrentPage(1);
   };
 
-  const filteredData = data
-    .filter(item => 
-      item.paperLongName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.paperCode.includes(searchTerm)
+  // Remove duplicates and sort the data
+  const processedData = data
+    .filter((item, index, self) => 
+      index === self.findIndex(t => 
+        t.paperCode === item.paperCode && t.mvCode === item.mvCode
+      )
     )
     .sort((a, b) => {
       const aVal = a[sortField];
@@ -50,9 +51,9 @@ export const ExamTable = ({ data }: ExamTableProps) => {
       return (Number(aVal) - Number(bVal)) * modifier;
     });
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const totalPages = Math.ceil(processedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedData = processedData.slice(startIndex, startIndex + itemsPerPage);
 
   const getProgressPercentage = (allocated: number, reconciled: number) => {
     return allocated > 0 ? (reconciled / allocated) * 100 : 0;
@@ -61,8 +62,8 @@ export const ExamTable = ({ data }: ExamTableProps) => {
   const exportToCSV = () => {
     const headers = ['Paper Code', 'Subject', 'Marking Zone', 'Venue Code', 'Venue Name', 'Examiners', 'Scripts Allocated', 'Scripts Reconciled', 'Scripts/Examiner', 'Completion Rate'];
     
-    // Export ALL filtered data (not just current page)
-    const csvData = filteredData.map(item => [
+    // Export ALL processed data (not just current page)
+    const csvData = processedData.map(item => [
       item.paperCode,
       item.paperLongName,
       item.markingZoneCode,
@@ -89,11 +90,11 @@ export const ExamTable = ({ data }: ExamTableProps) => {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
     
-    console.log(`Exported ${filteredData.length} records to CSV`);
+    console.log(`Exported ${processedData.length} records to CSV`);
   };
 
   const handlePrint = () => {
-    // Create a new window with all the filtered data for printing
+    // Create a new window with all the processed data for printing
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
     
@@ -116,7 +117,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
           <div class="header">
             <h1>WAEC Detailed Subject Report</h1>
             <p>Generated on: ${new Date().toLocaleString()}</p>
-            <p>Total Records: ${filteredData.length}</p>
+            <p>Total Records: ${processedData.length}</p>
           </div>
           <table>
             <thead>
@@ -134,7 +135,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
               </tr>
             </thead>
             <tbody>
-              ${filteredData.map(item => {
+              ${processedData.map(item => {
                 const scriptsPerExaminer = item.totalExaminers > 0 ? Math.round(item.totalAllocated / item.totalExaminers) : 0;
                 const completionRate = getProgressPercentage(item.totalAllocated, item.totalReconciled);
                 return `
@@ -170,29 +171,13 @@ export const ExamTable = ({ data }: ExamTableProps) => {
         <div className="flex items-center justify-between">
           <CardTitle className="text-blue-900">Detailed Subject Report</CardTitle>
           <div className="flex items-center gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search subjects or codes..."
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="pl-10 w-64"
-              />
-            </div>
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
             <Button variant="outline" size="sm" onClick={exportToCSV}>
               <FileText className="h-4 w-4 mr-2" />
-              Export CSV ({filteredData.length} records)
+              Export CSV ({processedData.length} records)
             </Button>
             <Button variant="outline" size="sm" onClick={handlePrint}>
               <Printer className="h-4 w-4 mr-2" />
-              Print All ({filteredData.length} records)
+              Print All ({processedData.length} records)
             </Button>
           </div>
         </div>
@@ -239,7 +224,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
                 const completionRate = getProgressPercentage(item.totalAllocated, item.totalReconciled);
                 
                 return (
-                  <tr key={item.paperCode} className={`border-b border-gray-100 hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                  <tr key={`${item.paperCode}-${item.mvCode}`} className={`border-b border-gray-100 hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                     <td className="p-3 font-mono text-sm text-blue-700">{item.paperCode}</td>
                     <td className="p-3 font-medium max-w-xs">
                       <div className="truncate" title={item.paperLongName}>
@@ -288,7 +273,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
         {/* Pagination */}
         <div className="flex items-center justify-between mt-6">
           <div className="text-sm text-gray-600">
-            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredData.length)} of {filteredData.length} subjects
+            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, processedData.length)} of {processedData.length} subjects
           </div>
           
           {totalPages > 1 && (
