@@ -1,8 +1,11 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Printer, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { FileText, Printer, Search } from 'lucide-react';
 import { ExamRecord } from '../data/mockDashboardData';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Pagination,
   PaginationContent,
@@ -20,6 +23,7 @@ export const ExamTable = ({ data }: ExamTableProps) => {
   const [sortField, setSortField] = useState<keyof ExamRecord>('totalAllocated');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
   const itemsPerPage = 15;
 
   const handleSort = (field: keyof ExamRecord) => {
@@ -32,13 +36,24 @@ export const ExamTable = ({ data }: ExamTableProps) => {
     setCurrentPage(1);
   };
 
-  // Remove duplicates and sort the data
+  // Remove duplicates, apply search filter, and sort the data
   const processedData = data
     .filter((item, index, self) => 
       index === self.findIndex(t => 
         t.paperCode === item.paperCode && t.mvCode === item.mvCode
       )
     )
+    .filter(item => {
+      if (!searchTerm) return true;
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        item.paperCode.toLowerCase().includes(searchLower) ||
+        item.paperLongName.toLowerCase().includes(searchLower) ||
+        item.mvName.toLowerCase().includes(searchLower) ||
+        item.markingZoneCode.toLowerCase().includes(searchLower) ||
+        item.mvCode.toString().includes(searchLower)
+      );
+    })
     .sort((a, b) => {
       const aVal = a[sortField];
       const bVal = b[sortField];
@@ -174,154 +189,187 @@ export const ExamTable = ({ data }: ExamTableProps) => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-blue-900">Detailed Subject Report</CardTitle>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm" onClick={exportToCSV}>
-              <FileText className="h-4 w-4 mr-2" />
-              Export CSV ({processedData.length} records)
-            </Button>
-            <Button variant="outline" size="sm" onClick={handlePrint}>
-              <Printer className="h-4 w-4 mr-2" />
-              Print All ({processedData.length} records)
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left p-3 font-semibold text-gray-700">
-                  <button onClick={() => handleSort('paperCode')} className="hover:text-blue-900">
-                    Paper Code {sortField === 'paperCode' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </button>
-                </th>
-                <th className="text-left p-3 font-semibold text-gray-700">
-                  <button onClick={() => handleSort('paperLongName')} className="hover:text-blue-900">
-                    Subject {sortField === 'paperLongName' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </button>
-                </th>
-                <th className="text-left p-3 font-semibold text-gray-700">Marking Zone</th>
-                <th className="text-left p-3 font-semibold text-gray-700">Venue Info</th>
-                <th className="text-left p-3 font-semibold text-gray-700">
-                  <button onClick={() => handleSort('totalExaminers')} className="hover:text-blue-900">
-                    Total Examiners {sortField === 'totalExaminers' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </button>
-                </th>
-                <th className="text-left p-3 font-semibold text-gray-700">
-                  <button onClick={() => handleSort('totalAllocated')} className="hover:text-blue-900">
-                    Scripts Allocated {sortField === 'totalAllocated' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </button>
-                </th>
-                <th className="text-left p-3 font-semibold text-gray-700">
-                  <button onClick={() => handleSort('totalReconciled')} className="hover:text-blue-900">
-                    Scripts Reconciled {sortField === 'totalReconciled' && (sortDirection === 'asc' ? '↑' : '↓')}
-                  </button>
-                </th>
-                <th className="text-left p-3 font-semibold text-gray-700">Completion Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedData.map((item, index) => {
-                const completionRate = getProgressPercentage(item.totalAllocated, item.totalReconciled);
-                
-                return (
-                  <tr key={`${item.paperCode}-${item.mvCode}`} className={`border-b border-gray-100 hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                    <td className="p-3 font-mono text-sm text-blue-700">{item.paperCode}</td>
-                    <td className="p-3 font-medium max-w-xs">
-                      <div className="truncate" title={getFullPaperName(item.paperCode, item.paperLongName)}>
-                        {getFullPaperName(item.paperCode, item.paperLongName)}
-                      </div>
-                    </td>
-                    <td className="p-3 text-center">
-                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
-                        {item.markingZoneCode}
-                      </span>
-                    </td>
-                    <td className="p-3">
-                      <div className="text-sm">
-                        <div className="font-medium">Code: {item.mvCode}</div>
-                        <div className="text-gray-600 text-xs truncate max-w-32" title={item.mvName}>
-                          {item.mvName}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-3 text-center">{item.totalExaminers.toLocaleString()}</td>
-                    <td className="p-3 text-center font-semibold">{item.totalAllocated.toLocaleString()}</td>
-                    <td className="p-3 text-center">
-                      <span className={`px-2 py-1 rounded text-sm ${item.totalReconciled > 0 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                        {item.totalReconciled.toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="p-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-12 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className={`h-2 rounded-full transition-all duration-300 ${completionRate > 0 ? 'bg-green-500' : 'bg-yellow-500'}`}
-                            style={{ width: `${Math.min(completionRate, 100)}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm text-gray-600 min-w-16">{completionRate.toFixed(2)}%</span>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        
-        {/* Pagination */}
-        <div className="flex items-center justify-between mt-6">
-          <div className="text-sm text-gray-600">
-            Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, processedData.length)} of {processedData.length} subjects
+    <TooltipProvider>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-blue-900">Detailed Subject Report</CardTitle>
+            <div className="flex items-center gap-4">
+              <Button variant="outline" size="sm" onClick={exportToCSV}>
+                <FileText className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+              <Button variant="outline" size="sm" onClick={handlePrint}>
+                <Printer className="h-4 w-4 mr-2" />
+                Print All
+              </Button>
+            </div>
           </div>
           
-          {totalPages > 1 && (
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                  />
-                </PaginationItem>
-                
-                {[...Array(totalPages)].map((_, i) => {
-                  const page = i + 1;
-                  if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
-                    return (
-                      <PaginationItem key={page}>
-                        <PaginationLink
-                          onClick={() => setCurrentPage(page)}
-                          isActive={currentPage === page}
-                          className="cursor-pointer"
-                        >
-                          {page}
-                        </PaginationLink>
-                      </PaginationItem>
-                    );
-                  } else if (page === currentPage - 2 || page === currentPage + 2) {
-                    return <PaginationItem key={page}>...</PaginationItem>;
-                  }
-                  return null;
+          {/* Search functionality */}
+          <div className="flex items-center gap-2 mt-4">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search subjects, codes, or venues..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="pl-10"
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left p-3 font-semibold text-gray-700">
+                    <button onClick={() => handleSort('paperCode')} className="hover:text-blue-900">
+                      Paper Code {sortField === 'paperCode' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </button>
+                  </th>
+                  <th className="text-left p-3 font-semibold text-gray-700">
+                    <button onClick={() => handleSort('paperLongName')} className="hover:text-blue-900">
+                      Subject {sortField === 'paperLongName' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </button>
+                  </th>
+                  <th className="text-left p-3 font-semibold text-gray-700">Marking Zone</th>
+                  <th className="text-left p-3 font-semibold text-gray-700">Venue Info</th>
+                  <th className="text-left p-3 font-semibold text-gray-700">
+                    <button onClick={() => handleSort('totalExaminers')} className="hover:text-blue-900">
+                      Total Examiners {sortField === 'totalExaminers' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </button>
+                  </th>
+                  <th className="text-left p-3 font-semibold text-gray-700">
+                    <button onClick={() => handleSort('totalAllocated')} className="hover:text-blue-900">
+                      Scripts Allocated {sortField === 'totalAllocated' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </button>
+                  </th>
+                  <th className="text-left p-3 font-semibold text-gray-700">
+                    <button onClick={() => handleSort('totalReconciled')} className="hover:text-blue-900">
+                      Scripts Reconciled {sortField === 'totalReconciled' && (sortDirection === 'asc' ? '↑' : '↓')}
+                    </button>
+                  </th>
+                  <th className="text-left p-3 font-semibold text-gray-700">Completion Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedData.map((item, index) => {
+                  const completionRate = getProgressPercentage(item.totalAllocated, item.totalReconciled);
+                  const fullPaperName = getFullPaperName(item.paperCode, item.paperLongName);
+                  
+                  return (
+                    <tr key={`${item.paperCode}-${item.mvCode}`} className={`border-b border-gray-100 hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                      <td className="p-3 font-mono text-sm text-blue-700">{item.paperCode}</td>
+                      <td className="p-3 font-medium max-w-xs">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="truncate cursor-help">
+                              {fullPaperName}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{fullPaperName}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </td>
+                      <td className="p-3 text-center">
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                          {item.markingZoneCode}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <div className="text-sm">
+                          <div className="font-medium">Code: {item.mvCode}</div>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="text-gray-600 text-xs truncate max-w-32 cursor-help">
+                                {item.mvName}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{item.mvName}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </td>
+                      <td className="p-3 text-center">{item.totalExaminers.toLocaleString()}</td>
+                      <td className="p-3 text-center font-semibold">{item.totalAllocated.toLocaleString()}</td>
+                      <td className="p-3 text-center">
+                        <span className={`px-2 py-1 rounded text-sm ${item.totalReconciled > 0 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                          {item.totalReconciled.toLocaleString()}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-12 bg-gray-200 rounded-full h-2">
+                            <div 
+                              className={`h-2 rounded-full transition-all duration-300 ${completionRate > 0 ? 'bg-green-500' : 'bg-yellow-500'}`}
+                              style={{ width: `${Math.min(completionRate, 100)}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-sm text-gray-600 min-w-16">{completionRate.toFixed(2)}%</span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
                 })}
-                
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Pagination */}
+          <div className="flex items-center justify-between mt-6">
+            <div className="text-sm text-gray-600">
+              Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, processedData.length)} of {processedData.length} subjects
+            </div>
+            
+            {totalPages > 1 && (
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                  
+                  {[...Array(totalPages)].map((_, i) => {
+                    const page = i + 1;
+                    if (page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => setCurrentPage(page)}
+                            isActive={currentPage === page}
+                            className="cursor-pointer"
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    } else if (page === currentPage - 2 || page === currentPage + 2) {
+                      return <PaginationItem key={page}>...</PaginationItem>;
+                    }
+                    return null;
+                  })}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </TooltipProvider>
   );
 };
